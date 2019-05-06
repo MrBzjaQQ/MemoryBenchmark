@@ -2,19 +2,32 @@
 
 
 
-long int Observer::GetBytesWritten()
+long long Observer::GetBytesWritten()
 {
-	return bytesWritten;
+	return bytesWritten.load();
 }
 
-void Observer::SetBytesWritten(long int bytesCount)
+long long Observer::GetBytesRead()
 {
-	bytesWritten = bytesCount;
+	return bytesRead.load();
+}
+
+void Observer::SetBytesWritten(long long bytesCount)
+{
+	bytesWritten.store(bytesCount);
+}
+
+void Observer::SetBytesRead(long long bytesCount)
+{
+	bytesRead.store(bytesCount);
 }
 
 Observer::Observer()
 {
-	stopped.store(false);
+	writeStopped.store(false);
+	readStopped.store(false);
+	bytesWritten.store(0);
+	bytesRead.store(0);
 }
 
 
@@ -22,24 +35,41 @@ Observer::~Observer()
 {
 }
 
-void Observer::update(bool * argument)
+void Observer::Update(bool * argument)
 {
 	bool isStopped = *argument;
-	stopped.store(isStopped);
+	writeStopped.store(isStopped);
+	readStopped.store(isStopped);
 }
 
-void Observer::update(long long *argument)
+void Observer::UpdateWrite(long long *argument)
 {
 	long long *amountOfBytes = static_cast<long long*>(argument);
 	bytesWritten += *amountOfBytes;
 }
 
-bool Observer::GetStopped()
+void Observer::UpdateRead(long long * argument)
 {
-	return stopped.load();
+	long long *amountOfBytes = static_cast<long long*>(argument);
+	bytesRead += *amountOfBytes;
 }
 
-void Observer::SetStopped(bool isStopped)
+bool Observer::GetWriteStopped()
 {
-	stopped.store(isStopped);
+	return writeStopped.load();
+}
+
+bool Observer::GetReadStopped()
+{
+	return readStopped.load();
+}
+
+void Observer::SetWriteStopped(bool isStopped)
+{
+	writeStopped.store(isStopped);
+}
+
+void Observer::SetReadStopped(bool isStopped)
+{
+	readStopped.store(isStopped);
 }

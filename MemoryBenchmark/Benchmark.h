@@ -7,11 +7,11 @@
 #include "Observable.h"
 struct BenchmarkParameters {
 	BenchmarkParameters() {
-		logFileName = std::string("BenchmarkLogs.csv");
+		logFilePrefix = std::string("BenchmarkLogs");
 	}
 	int BlockSize = 128;
 	long long RepeatCounter = 1000000;
-	std::string logFileName;
+	std::string logFilePrefix;
 };
 class Benchmark : public Observable
 {
@@ -22,10 +22,12 @@ public:
 	~Benchmark();
 private:
 	std::thread benchmarkThread;
-	void BeginBenchmark();
+	void BeginWriteBenchmark();
+	void BeginReadBenchmark();
 	char* CreateBuffer(int length);
 	void DeleteBuffer();
-	long long bytesWritten;
+	long long bytesWritten = 0;
+	long long bytesRead = 0;
 	BenchmarkParameters parameters;
 	std::string testFileName;
 	std::atomic<bool> interruptionFlag;

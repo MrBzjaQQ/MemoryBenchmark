@@ -1,10 +1,12 @@
 #include "Benchmark.h"
 #include <exception>
+//TODO добавить флаг -fwrite для работы через fwrite()
+//В противном случае вызывать write
 
-//MemoryBenchmark -b 3192 -r 10000000 -f logresults.csv
+//MemoryBenchmark -b 3192 -r 10000000 -f logresults
 //-b - блок записи 3192 байта
 //-r - число повторений 10 000 000 раз
-//-f /home/logresults.csv - запись в файл logresults.csv
+//-f /home/logresults.csv - запись в файл logresults-read.csv и logresults-write.csv
 
 //MemoryBenchmark -b 3192
 //-b - блок записи 3192 байта
@@ -36,7 +38,7 @@ int main(int argc, char **argv)
 			arguments.BlockSize = ParseNumericArgument(numericValue);
 		}
 		else if (str.compare("-f") == 0) {
-			arguments.logFileName = std::string(argv[i + 1]);
+			arguments.logFilePrefix = std::string(argv[i + 1]);
 		}
 		else
 		{
@@ -44,7 +46,7 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	BenchmarkResultsLogger logger(arguments.logFileName);
+	BenchmarkResultsLogger logger(arguments.logFilePrefix);
 	Benchmark benchmark(arguments);
 	benchmark.AddObserver(&logger);
 	logger.Start();

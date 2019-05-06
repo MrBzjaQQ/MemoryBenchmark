@@ -2,20 +2,40 @@
 
 
 
-void Observable::SetFinished(bool finished)
+void Observable::SetWriteFinished(bool finished)
 {
-	isFinished.store(finished);
+	isWriteFinished.store(finished);
+	for (auto *ob : observers)
+		ob->SetWriteStopped(finished);
+	
+}
+
+void Observable::SetReadFinished(bool finished)
+{
+	isReadFinished.store(finished);
+	for (auto *ob : observers)
+		ob->SetReadStopped(finished);
 }
 
 bool Observable::GetFinished()
 {
-	return isFinished.load();
+	return isWriteFinished.load() & isReadFinished.load();
+}
+
+bool Observable::GetWriteFinished()
+{
+	return isWriteFinished.load();
+}
+
+bool Observable::GetReadFinished()
+{
+	return isReadFinished.load();
 }
 
 Observable::Observable()
 {
 	isChanged.store(false);
-	isFinished.store(false);
+	isWriteFinished.store(false);
 }
 
 
@@ -33,16 +53,22 @@ void Observable::DeleteObserver(Observer * observer)
 	observers.remove(observer);
 }
 
-void Observable::NotifyObservers(long long *value)
+void Observable::NotifyObserversOnWritten(long long *value)
 {
 	for (auto *ob : observers)
-		ob->update(value);
+		ob->UpdateWrite(value);
+}
+
+void Observable::NotifyObserversOnRead(long long * value)
+{
+	for (auto *ob : observers)
+		ob->UpdateRead(value);
 }
 
 void Observable::NotifyObservers(bool * value)
 {
 	for (auto *ob : observers)
-		ob->update(value);
+		ob->Update(value);
 }
 
 void Observable::SetChanged()

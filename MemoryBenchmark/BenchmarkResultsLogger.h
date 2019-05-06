@@ -6,6 +6,7 @@
 #include "Observer.h"
 #include <stdio.h>
 #include <ctime>
+#include <list>
 //пишет логи в .csv в отдельном потоке.
 class BenchmarkResultsLogger : public Observer
 {
@@ -18,13 +19,16 @@ public:
 	void Start();
 	void Stop();
 private:
+	//std::list<std::tuple<double, std::string, long long>> readRecords; //список записей с результатами чтения
+	//std::list<std::tuple<double, std::string, long long>> writeRecords; //список записей с результатами записи
 	bool workFinished;
 	std::string logFileHeader;
 	std::string logFile;
 	std::string systemAnswer;
 	FILE *logFileStream;
 	std::thread loggerThread;
-	void BeginLogger();
+	void BeginWriteLogger();
+	void BeginReadLogger();
 	std::string ReadSystemAnswer();
 	std::string ExecuteConsoleCommand(std::string command);
 };
