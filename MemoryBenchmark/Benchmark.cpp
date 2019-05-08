@@ -37,15 +37,11 @@ void Benchmark::BeginWriteBenchmark()
 	}
 	for (int iteration = 0; iteration < parameters.RepeatCounter && interruptionFlag.load() == false; iteration++)
 	{
-		//int handle = fileno(testFile);
 		timespec mt1, mt2;
-		//clock_t start = clock();
-		clock_gettime(CLOCK_MONOTONIC, &mt1);
+		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt1);
 		int bytesWritten = fwrite(buffer, sizeof(char), parameters.BlockSize, testFile);
-		clock_gettime(CLOCK_MONOTONIC, &mt2);
-		double duration = (mt2.tv_sec * 1000 + mt2.tv_nsec / 1000000) - (mt1.tv_sec * 1000 + mt1.tv_nsec / 1000000);
-		//clock_t finish = clock();
-		//double duration = (double)(finish - start) / CLOCKS_PER_SEC;
+		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt2);
+		long duration = (mt2.tv_sec * 1000LL + mt2.tv_nsec / 1000000) - (mt1.tv_sec * 1000LL + mt1.tv_nsec / 1000000);
 		LogRecord record;
 		record.amountOfBytes = bytesWritten;
 		record.executionTime = duration;
@@ -69,10 +65,11 @@ void Benchmark::BeginReadBenchmark()
 	buffer = new char[parameters.BlockSize];
 	for (int iteration = 0; iteration < parameters.RepeatCounter && interruptionFlag.load() == false; iteration++)
 	{
-		clock_t start = clock();
+		timespec mt1, mt2;
+		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt1);
 		int bytesRead = fread(buffer, sizeof(char), parameters.BlockSize, testFile);
-		clock_t finish = clock();
-		double duration = (double)(finish - start) / CLOCKS_PER_SEC;
+		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt2);
+		long duration = (mt2.tv_sec * 1000LL + mt2.tv_nsec / 1000000) - (mt1.tv_sec * 1000LL + mt1.tv_nsec / 1000000);
 		LogRecord record;
 		record.amountOfBytes = bytesRead;
 		record.executionTime = duration;

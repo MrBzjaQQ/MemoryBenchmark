@@ -4,7 +4,7 @@
 struct LogRecord
 {
 	time_t timestamp;
-	double executionTime;
+	long executionTime;
 	double cpuLoad;
 	long long amountOfBytes;
 public:
