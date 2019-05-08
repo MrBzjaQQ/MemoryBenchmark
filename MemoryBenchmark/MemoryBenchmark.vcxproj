@@ -77,15 +77,19 @@
   <ItemGroup>
     <ClCompile Include="Benchmark.cpp" />
     <ClCompile Include="BenchmarkResultsLogger.cpp" />
+    <ClCompile Include="LogRecord.cpp" />
     <ClCompile Include="MemoryBenchmark.cpp" />
     <ClCompile Include="Observable.cpp" />
     <ClCompile Include="Observer.cpp" />
+    <ClCompile Include="procinfo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Benchmark.h" />
     <ClInclude Include="BenchmarkResultsLogger.h" />
+    <ClInclude Include="LogRecord.h" />
     <ClInclude Include="Observable.h" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="procinfo.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link />

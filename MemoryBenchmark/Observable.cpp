@@ -1,22 +1,6 @@
 #include "Observable.h"
 
 
-
-void Observable::SetWriteFinished(bool finished)
-{
-	isWriteFinished.store(finished);
-	for (auto *ob : observers)
-		ob->SetWriteStopped(finished);
-	
-}
-
-void Observable::SetReadFinished(bool finished)
-{
-	isReadFinished.store(finished);
-	for (auto *ob : observers)
-		ob->SetReadStopped(finished);
-}
-
 bool Observable::GetFinished()
 {
 	return isWriteFinished.load() & isReadFinished.load();
@@ -53,16 +37,16 @@ void Observable::DeleteObserver(Observer * observer)
 	observers.remove(observer);
 }
 
-void Observable::NotifyObserversOnWritten(long long *value)
+void Observable::NotifyObserversOnWritten(LogRecord record)
 {
 	for (auto *ob : observers)
-		ob->UpdateWrite(value);
+		ob->UpdateWrite(record);
 }
 
-void Observable::NotifyObserversOnRead(long long * value)
+void Observable::NotifyObserversOnRead(LogRecord record)
 {
 	for (auto *ob : observers)
-		ob->UpdateRead(value);
+		ob->UpdateRead(record);
 }
 
 void Observable::NotifyObservers(bool * value)

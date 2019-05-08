@@ -4,7 +4,6 @@
 BenchmarkResultsLogger::BenchmarkResultsLogger()
 {
 	logFile = std::string("log.csv");
-	SetBytesWritten(0);
 }
 
 BenchmarkResultsLogger::BenchmarkResultsLogger(std::string logFilename)
@@ -31,14 +30,14 @@ void BenchmarkResultsLogger::JoinThread()
 
 void BenchmarkResultsLogger::Start()
 {
-	logFileHeader = std::string("load,time,speed\n");
+	logFileHeader = std::string("local_time (hh:mm:ss);execution_time (s);cpu_load;amount_of_bytes;speed (bytes/s)\n");
+	/*
+		time_t timestamp;
+	double executionTime;
+	double cpuLoad;
+	long long amountOfBytes;
+	*/
 	loggerThread = std::thread([this] {BeginWriteLogger(); BeginReadLogger(); });
-}
-
-void BenchmarkResultsLogger::Stop()
-{
-	SetWriteStopped(true);
-	SetReadStopped(true);
 }
 
 void BenchmarkResultsLogger::BeginWriteLogger()
@@ -51,21 +50,9 @@ void BenchmarkResultsLogger::BeginWriteLogger()
 		return;
 	}
 	fwrite(logFileHeader.c_str(), sizeof(char), logFileHeader.length(), logFileStream);
-	while (!GetWriteStopped())
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		time_t timeBegin = time(NULL);
-		system("grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage}' > result");
-		std::string load = ReadSystemAnswer();
-		load = load.substr(0, load.length() - 2);
-		tm *tmStruct = localtime(&timeBegin);
-		std::string time;
-		time.append(std::to_string(tmStruct->tm_hour)).append(":").append(std::to_string(tmStruct->tm_min)).append(":")
-			.append(std::to_string(tmStruct->tm_sec));
-		std::string result;
-		result.append(load.c_str()).append(",").append(time.c_str()).append(",").append(std::to_string(GetBytesWritten())).append("\n");
-		fwrite(result.c_str(), sizeof(char), result.length(), logFileStream);
-		SetBytesWritten(0);
+	for (LogRecord rec : writeRecords) {
+		std::string record = rec.ToStringWithSpeed();
+		fwrite(record.c_str(), sizeof(char), record.length(), logFileStream);
 	}
 	fclose(logFileStream);
 }
@@ -81,21 +68,9 @@ void BenchmarkResultsLogger::BeginReadLogger()
 		return;
 	}
 	fwrite(logFileHeader.c_str(), sizeof(char), logFileHeader.length(), logFileStream);
-	while (!GetReadStopped())
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		time_t timeBegin = time(NULL);
-		system("grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage}' > result");
-		std::string load = ReadSystemAnswer();
-		load = load.substr(0, load.length() - 2);
-		tm *tmStruct = localtime(&timeBegin);
-		std::string time;
-		time.append(std::to_string(tmStruct->tm_hour)).append(":").append(std::to_string(tmStruct->tm_min)).append(":")
-			.append(std::to_string(tmStruct->tm_sec));
-		std::string result;
-		result.append(load.c_str()).append(",").append(time.c_str()).append(",").append(std::to_string(GetBytesRead())).append("\n");
-		fwrite(result.c_str(), sizeof(char), result.length(), logFileStream);
-		SetBytesRead(0);
+	for (LogRecord rec : readRecords) {
+		std::string record = rec.ToStringWithSpeed();
+		fwrite(record.c_str(), sizeof(char), record.length(), logFileStream);
 	}
 	fclose(logFileStream);
 	workFinished = true;

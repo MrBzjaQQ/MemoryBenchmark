@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <ctime>
 #include <list>
+#include "procinfo.h"
+#include "LogRecord.h"
 //пишет логи в .csv в отдельном потоке.
 class BenchmarkResultsLogger : public Observer
 {
@@ -17,10 +19,7 @@ public:
 	bool GetWorkFinished();
 	void JoinThread();
 	void Start();
-	void Stop();
 private:
-	//std::list<std::tuple<double, std::string, long long>> readRecords; //список записей с результатами чтения
-	//std::list<std::tuple<double, std::string, long long>> writeRecords; //список записей с результатами записи
 	bool workFinished;
 	std::string logFileHeader;
 	std::string logFile;

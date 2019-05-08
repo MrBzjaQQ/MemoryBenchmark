@@ -49,8 +49,9 @@ int main(int argc, char **argv)
 	BenchmarkResultsLogger logger(arguments.logFilePrefix);
 	Benchmark benchmark(arguments);
 	benchmark.AddObserver(&logger);
-	logger.Start();
+	//logger.Start();
 	benchmark.Start();
+	logger.Start();
 	logger.JoinThread();
 }
 

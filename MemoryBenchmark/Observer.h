@@ -1,25 +1,19 @@
 #pragma once
 #include <atomic>
+#include <list>
+#include <condition_variable>
+#include "LogRecord.h"
 class Observer
 {
-	std::atomic< long long > bytesWritten;
-	std::atomic<long long> bytesRead;
-	std::atomic<bool> writeStopped;
-	std::atomic<bool> readStopped;
 protected:
-	long long GetBytesWritten();
-	long long GetBytesRead();
-	void SetBytesWritten(long long bytesCount);
-	void SetBytesRead(long long bytesCount);
+	std::list<LogRecord> readRecords;
+	std::list<LogRecord> writeRecords;
+	std::condition_variable benchmarkCompleted;
 public:
 	Observer();
 	~Observer();
 	virtual void Update(bool *argument);
-	virtual void UpdateWrite(long long *argument);
-	virtual void UpdateRead(long long *argument);
-	bool GetWriteStopped();
-	bool GetReadStopped();
-	void SetWriteStopped(bool isStopped);
-	void SetReadStopped(bool isStopped);
+	virtual void UpdateWrite(LogRecord record);
+	virtual void UpdateRead(LogRecord record);
 };
 

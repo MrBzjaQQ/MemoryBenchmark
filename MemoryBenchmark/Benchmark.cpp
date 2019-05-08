@@ -38,22 +38,25 @@ void Benchmark::BeginWriteBenchmark()
 	for (int iteration = 0; iteration < parameters.RepeatCounter && interruptionFlag.load() == false; iteration++)
 	{
 		//int handle = fileno(testFile);
-		fwrite(buffer, sizeof(buffer), parameters.BlockSize, testFile);
-		bytesWritten += parameters.BlockSize;
-		if (iteration % 10000 == 9999)
-		{
-			NotifyObserversOnWritten(&bytesWritten);
-			bytesWritten = 0;
-		}
+		clock_t start = clock();
+		int bytesWritten = fwrite(buffer, sizeof(char), parameters.BlockSize, testFile);
+		clock_t finish = clock();
+		double duration = (double)(finish - start) / CLOCKS_PER_SEC;
+		LogRecord record;
+		record.amountOfBytes = bytesWritten;
+		record.executionTime = duration;
+		record.timestamp = time(NULL);
+		record.cpuLoad = Procinfo::GetCPULoad();
+		NotifyObserversOnWritten(record);
 	}
-	SetWriteFinished(true);
 	DeleteBuffer();
 	fclose(testFile);
 }
 
 void Benchmark::BeginReadBenchmark()
 {
-	FILE *testFile = fopen(testFileName.c_str(), "w+");
+	std::cout << "Read benchmark has started" << std::endl;
+	FILE *testFile = fopen(testFileName.c_str(), "r");
 	if (!testFile)
 	{
 		std::cout << "Cannot read file." << std::endl;
@@ -62,15 +65,17 @@ void Benchmark::BeginReadBenchmark()
 	buffer = new char[parameters.BlockSize];
 	for (int iteration = 0; iteration < parameters.RepeatCounter && interruptionFlag.load() == false; iteration++)
 	{
-		fread(buffer, sizeof(buffer), parameters.BlockSize, testFile);
-		bytesRead += parameters.BlockSize;
-		if (iteration % 10000 == 9999)
-		{
-			NotifyObserversOnRead(&bytesRead);
-			bytesRead = 0;
-		}
+		clock_t start = clock();
+		int bytesRead = fread(buffer, sizeof(char), parameters.BlockSize, testFile);
+		clock_t finish = clock();
+		double duration = (double)(finish - start) / CLOCKS_PER_SEC;
+		LogRecord record;
+		record.amountOfBytes = bytesRead;
+		record.executionTime = duration;
+		record.timestamp = time(NULL);
+		record.cpuLoad = Procinfo::GetCPULoad();
+		NotifyObserversOnRead(record);
 	}
-	SetReadFinished(true);
 	bool isFinished = GetFinished();
 	NotifyObservers(&isFinished);
 	fclose(testFile);
