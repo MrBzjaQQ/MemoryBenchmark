@@ -30,7 +30,7 @@ void BenchmarkResultsLogger::JoinThread()
 
 void BenchmarkResultsLogger::Start()
 {
-	logFileHeader = std::string("local_time (hh:mm:ss);execution_time (s);cpu_load;amount_of_bytes;speed (bytes/s)\n");
+	logFileHeader = std::string("local_time (hh:mm:ss);execution_time (s);cpu_load;amount_of_bytes\n");
 	/*
 		time_t timestamp;
 	double executionTime;
@@ -50,8 +50,9 @@ void BenchmarkResultsLogger::BeginWriteLogger()
 		return;
 	}
 	fwrite(logFileHeader.c_str(), sizeof(char), logFileHeader.length(), logFileStream);
+	long long amountOfBytes;
 	for (LogRecord rec : writeRecords) {
-		std::string record = rec.ToStringWithSpeed();
+		std::string record = rec.ToString();
 		fwrite(record.c_str(), sizeof(char), record.length(), logFileStream);
 	}
 	fclose(logFileStream);
@@ -69,7 +70,7 @@ void BenchmarkResultsLogger::BeginReadLogger()
 	}
 	fwrite(logFileHeader.c_str(), sizeof(char), logFileHeader.length(), logFileStream);
 	for (LogRecord rec : readRecords) {
-		std::string record = rec.ToStringWithSpeed();
+		std::string record = rec.ToString();
 		fwrite(record.c_str(), sizeof(char), record.length(), logFileStream);
 	}
 	fclose(logFileStream);
