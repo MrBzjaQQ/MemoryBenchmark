@@ -30,7 +30,7 @@ void BenchmarkResultsLogger::JoinThread()
 
 void BenchmarkResultsLogger::Start()
 {
-	logFileHeader = std::string("local_time (hh:mm:ss);execution_time (s);cpu_load;amount_of_bytes\n");
+	logFileHeader = std::string("local_time (hh:mm:ss);execution_time (us);cpu_load;amount_of_bytes\n");
 	/*
 		time_t timestamp;
 	double executionTime;

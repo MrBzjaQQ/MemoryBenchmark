@@ -27,7 +27,7 @@ void Benchmark::BeginWriteBenchmark()
 {
 	std::cout << "Write benchmark has started" << std::endl;
 	FILE *testFile;
-	testFileName = std::string("testFile");
+	testFileName = tempnam("/root/Benchmark", "f");
 	testFile = fopen(testFileName.c_str(), "w+");
 	buffer = CreateBuffer(parameters.BlockSize);
 	if (!testFile)
@@ -40,8 +40,9 @@ void Benchmark::BeginWriteBenchmark()
 		timespec mt1, mt2;
 		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt1);
 		int bytesWritten = fwrite(buffer, sizeof(char), parameters.BlockSize, testFile);
+		fsync(testFile->_fileno);
 		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt2);
-		long duration = (mt2.tv_sec * 1000LL + mt2.tv_nsec / 1000000) - (mt1.tv_sec * 1000LL + mt1.tv_nsec / 1000000);
+		long duration = (mt2.tv_sec * 1000000LL + mt2.tv_nsec / 1000) - (mt1.tv_sec * 1000000LL + mt1.tv_nsec / 1000);
 		LogRecord record;
 		record.amountOfBytes = bytesWritten;
 		record.executionTime = duration;
@@ -56,6 +57,9 @@ void Benchmark::BeginWriteBenchmark()
 void Benchmark::BeginReadBenchmark()
 {
 	std::cout << "Read benchmark has started" << std::endl;
+	std::string newName(tempnam("/root/Benchmark", "f"));
+	rename(testFileName.c_str(), newName.c_str());
+	testFileName = newName;
 	FILE *testFile = fopen(testFileName.c_str(), "r");
 	if (!testFile)
 	{
@@ -69,7 +73,7 @@ void Benchmark::BeginReadBenchmark()
 		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt1);
 		int bytesRead = fread(buffer, sizeof(char), parameters.BlockSize, testFile);
 		clock_gettime(CLOCK_MONOTONIC_COARSE, &mt2);
-		long duration = (mt2.tv_sec * 1000LL + mt2.tv_nsec / 1000000) - (mt1.tv_sec * 1000LL + mt1.tv_nsec / 1000000);
+		long duration = (mt2.tv_sec * 1000000LL + mt2.tv_nsec / 1000) - (mt1.tv_sec * 1000000LL + mt1.tv_nsec / 1000);
 		LogRecord record;
 		record.amountOfBytes = bytesRead;
 		record.executionTime = duration;
@@ -80,7 +84,7 @@ void Benchmark::BeginReadBenchmark()
 	bool isFinished = GetFinished();
 	NotifyObservers(&isFinished);
 	fclose(testFile);
-	remove("testFile");
+	remove(testFileName.c_str());
 	delete[] buffer;
 	std::cout << "Benchmark has finished" << std::endl;
 	std::cout << "Please find your results in " << parameters.logFilePrefix.c_str()
